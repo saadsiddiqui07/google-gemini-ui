@@ -1,9 +1,10 @@
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
 import { DrawerActions } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
-import React, { useState } from 'react';
-import { Dimensions, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import React, { useCallback, useRef, useState } from 'react';
+import { Dimensions, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 import { Avatar, IconButton, Surface, Text, useTheme } from 'react-native-paper';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -16,6 +17,13 @@ export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   const insets = useSafeAreaInsets();
+
+  // Bottom Sheet Logic
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const handlePresentModalPress = useCallback(() => {
+    Keyboard.dismiss(); 
+    bottomSheetModalRef.current?.present();
+  }, []);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top', 'left', 'right']}>
@@ -52,18 +60,6 @@ export default function HomeScreen() {
             </Text>
           </View>
 
-          {/* Suggestion Cards */}
-          {/* <View style={styles.suggestions}>
-            <SuggestionCard 
-              text="Make me a 2025 year-in-review worksheet" 
-              pillColor={isDark ? "#6552FF" : "#AF52DE"}
-            />
-             <SuggestionCard 
-              text="Show me at a '20s New Year's celebration" 
-              pillColor={isDark ? "#6552FF" : "#AF52DE"}
-            />
-          </View> */}
-
           {/* Action Chips */}
           <View style={styles.chipsContainer}>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ overflow: 'visible' }}>
@@ -90,7 +86,7 @@ export default function HomeScreen() {
           />
           <View style={styles.bottomActions}>
               <View style={styles.leftActions}>
-                  <IconButton icon="plus" size={24} iconColor={theme.colors.onSurface} style={styles.actionIcon} />
+                  <IconButton icon="plus" size={24} iconColor={theme.colors.onSurface} style={styles.actionIcon} onPress={handlePresentModalPress} />
                   <IconButton icon="image-outline" size={24} iconColor={theme.colors.onSurface} style={styles.actionIcon} />
               </View>
               <View style={styles.rightActions}>
@@ -103,21 +99,39 @@ export default function HomeScreen() {
           </View>
         </Surface>
       </KeyboardAvoidingView>
+
+      {/* Bottom Sheet Modal */}
+      <BottomSheetModal
+      ref={bottomSheetModalRef}
+        enableDynamicSizing={true}
+        backgroundStyle={{ backgroundColor: theme.colors.elevation.level3 }}
+        handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
+        backdropComponent={(props) => (
+            <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />
+        )}
+      >
+        <BottomSheetView style={styles.bottomSheetContent}>
+            <BottomSheetItem icon="snowman" label="Create images" />
+            <BottomSheetItem icon="web" label="Deep Research" />
+            <BottomSheetItem icon="plus-box-outline" label="Canvas" />
+            <BottomSheetItem icon="school-outline" label="Guided Learning" />
+        </BottomSheetView>
+      </BottomSheetModal>
     </SafeAreaView>
   );
 }
 
-// function SuggestionCard({ text, pillColor }: { text: string; pillColor: string }) {
-//     const theme = useTheme();
-//     return (
-//         <View style={styles.card}>
-//              <View style={styles.cardContent}>
-//                  <View style={[styles.pill, { backgroundColor: pillColor }]} />
-//                 <Text style={[styles.cardText, {color: theme.colors.onSurface}]}>{text}</Text>
-//              </View>
-//         </View>
-//     )
-// }
+function BottomSheetItem({ icon, label }: { icon: any; label: string }) {
+    const theme = useTheme();
+    return (
+        <TouchableOpacity style={styles.bottomSheetItem}>
+            <View style={styles.bottomSheetIconWrapper}>
+               <MaterialCommunityIcons name={icon} size={24} color={theme.colors.onSurface} />
+            </View>
+            <Text style={[styles.bottomSheetLabel, { color: theme.colors.onSurface }]}>{label}</Text>
+        </TouchableOpacity>
+    )
+}
 
 function ActionChip({ icon, label, iconColor }: { icon: any; label: string; iconColor: string }) {
     const theme = useTheme();
@@ -264,5 +278,22 @@ const styles = StyleSheet.create({
   fastBadgeText: {
       fontSize: 12,
       fontWeight: '600',
+  },
+  bottomSheetContent: {
+      padding: 16,
+      paddingTop: 8,
+      paddingBottom: 20
+  },
+  bottomSheetItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 16,
+  },
+  bottomSheetIconWrapper: {
+      marginRight: 16,
+  },
+  bottomSheetLabel: {
+      fontSize: 18,
+      fontWeight: '400',
   }
 });
