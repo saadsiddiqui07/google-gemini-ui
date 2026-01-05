@@ -43,7 +43,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <PaperProvider theme={theme}>
         <BottomSheetModalProvider>
-          <ThemeProvider value={theme}>
+          <ThemeProvider value={theme as any}>
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(drawer)" />
               <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />

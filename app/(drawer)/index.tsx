@@ -1,34 +1,70 @@
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { BottomSheetBackdrop, BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
-import { DrawerActions } from '@react-navigation/native';
-import { useNavigation } from 'expo-router';
-import React, { useCallback, useRef, useState } from 'react';
-import { Dimensions, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
-import { Avatar, IconButton, Surface, Text, useTheme } from 'react-native-paper';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet";
+import { DrawerActions } from "@react-navigation/native";
+import { useNavigation } from "expo-router";
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import {
+  Dimensions,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import {
+  Avatar,
+  IconButton,
+  Surface,
+  Text,
+  useTheme,
+} from "react-native-paper";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 export default function HomeScreen() {
   const theme = useTheme();
   const navigation = useNavigation();
-  const [inputText, setInputText] = useState('');
+  const [inputText, setInputText] = useState("");
   const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = colorScheme === "dark";
   const insets = useSafeAreaInsets();
 
   // Bottom Sheet Logic
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+  const modelBottomSheetRef = useRef<BottomSheetModal>(null);
+
+  const snapPoints = useMemo(() => ["45%"], []);
+  const modelSnapPoints = useMemo(() => ["65%"], []);
+
   const handlePresentModalPress = useCallback(() => {
-    Keyboard.dismiss(); 
+    Keyboard.dismiss();
     bottomSheetModalRef.current?.present();
   }, []);
 
+  const handlePresentModelModalPress = useCallback(() => {
+    Keyboard.dismiss();
+    modelBottomSheetRef.current?.present();
+  }, []);
+
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top', 'left', 'right']}>
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+      edges={["top", "left", "right"]}
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
       >
         {/* Header */}
@@ -39,112 +75,336 @@ export default function HomeScreen() {
             iconColor={theme.colors.onSurface}
             onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
           />
-          <Text variant="titleLarge" style={[styles.headerTitle, { color: theme.colors.onSurface }]}>Gemini</Text>
-          <Avatar.Text 
-              size={36} 
-              label="S" 
-              style={{ backgroundColor: isDark ? '#7cacf8' : '#AF52DE' }} 
-              labelStyle={{ color: '#000', fontWeight: 'bold' }}
+          <Text
+            variant="titleLarge"
+            style={[styles.headerTitle, { color: theme.colors.onSurface }]}
+          >
+            Gemini
+          </Text>
+          <Avatar.Text
+            size={36}
+            label="S"
+            style={{ backgroundColor: isDark ? "#7cacf8" : "#AF52DE" }}
+            labelStyle={{ color: "#000", fontWeight: "bold" }}
           />
         </View>
 
-        <ScrollView 
-          contentContainerStyle={styles.content} 
-          showsVerticalScrollIndicator={false} 
+        <ScrollView
+          contentContainerStyle={styles.content}
+          showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           style={{ flex: 1 }}
         >
           <View style={styles.greetingContainer}>
-            <Text variant="headlineLarge" style={[styles.greetingText, { color: theme.colors.onSurface }]}>
+            <Text
+              variant="headlineLarge"
+              style={[styles.greetingText, { color: theme.colors.onSurface }]}
+            >
               I can help write, plan, research and more. What should we do?
             </Text>
           </View>
 
           {/* Action Chips */}
           <View style={styles.chipsContainer}>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ overflow: 'visible' }}>
-                  <View style={styles.chipsColumn}>
-                      <ActionChip icon="image-outline" label="Create image" iconColor="#90caf9" />
-                      <ActionChip icon="pencil-outline" label="Write anything" iconColor="#81d4fa" />
-                      <ActionChip icon="school-outline" label="Help me learn" iconColor="#ffcc80" />
-                      <ActionChip icon="star-four-points-outline" label="Boost my day" iconColor="#fff59d" />
-                  </View>
-              </ScrollView>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{ overflow: "visible" }}
+            >
+              <View style={styles.chipsColumn}>
+                <ActionChip
+                  icon="image-outline"
+                  label="Create image"
+                  iconColor="#90caf9"
+                />
+                <ActionChip
+                  icon="pencil-outline"
+                  label="Write anything"
+                  iconColor="#81d4fa"
+                />
+                <ActionChip
+                  icon="school-outline"
+                  label="Help me learn"
+                  iconColor="#ffcc80"
+                />
+                <ActionChip
+                  icon="star-four-points-outline"
+                  label="Boost my day"
+                  iconColor="#fff59d"
+                />
+              </View>
+            </ScrollView>
           </View>
-
         </ScrollView>
 
         {/* Bottom Input Area - Keyboard Aware */}
-        <Surface style={[styles.bottomPanel, { backgroundColor: theme.colors.surface, paddingBottom: Math.max(16, insets.bottom) }]} elevation={0}>
+        <Surface
+          style={[
+            styles.bottomPanel,
+            {
+              backgroundColor: theme.colors.surface,
+              paddingBottom: Math.max(16, insets.bottom),
+            },
+          ]}
+          elevation={0}
+        >
           <TextInput
-              style={[styles.textInput, { color: theme.colors.onSurface }]}
-              placeholder="Ask Gemini"
-              placeholderTextColor={theme.colors.onSurfaceVariant}
-              value={inputText}
-              onChangeText={setInputText}
-              multiline
+            style={[styles.textInput, { color: theme.colors.onSurface }]}
+            placeholder="Ask Gemini"
+            placeholderTextColor={theme.colors.onSurfaceVariant}
+            value={inputText}
+            onChangeText={setInputText}
+            multiline
           />
           <View style={styles.bottomActions}>
-              <View style={styles.leftActions}>
-                  <IconButton icon="plus" size={24} iconColor={theme.colors.onSurface} style={styles.actionIcon} onPress={handlePresentModalPress} />
-                  <IconButton icon="image-outline" size={24} iconColor={theme.colors.onSurface} style={styles.actionIcon} />
-              </View>
-              <View style={styles.rightActions}>
-                   <Surface style={[styles.fastBadge, { borderColor: theme.colors.outline }]} elevation={0}>
-                       <Text style={[styles.fastBadgeText, { color: theme.colors.onSurface }]}>Fast</Text>
-                   </Surface>
-                   <IconButton icon="microphone" size={24} iconColor={theme.colors.onSurface} style={styles.actionIcon} />
-                   <IconButton icon="creation" size={24} iconColor={theme.colors.onSurface} style={styles.actionIcon} />
-              </View>
+            <View style={styles.leftActions}>
+              <IconButton
+                icon="plus"
+                size={24}
+                iconColor={theme.colors.onSurface}
+                style={styles.actionIcon}
+                onPress={handlePresentModalPress}
+              />
+              <IconButton
+                icon="image-outline"
+                size={24}
+                iconColor={theme.colors.onSurface}
+                style={styles.actionIcon}
+              />
+            </View>
+            <View style={styles.rightActions}>
+              <TouchableOpacity onPress={handlePresentModelModalPress}>
+                <Surface
+                  style={[
+                    styles.fastBadge,
+                    { borderColor: theme.colors.outline },
+                  ]}
+                  elevation={0}
+                >
+                  <Text
+                    style={[
+                      styles.fastBadgeText,
+                      { color: theme.colors.onSurface },
+                    ]}
+                  >
+                    Fast
+                  </Text>
+                </Surface>
+              </TouchableOpacity>
+              <IconButton
+                icon="microphone"
+                size={24}
+                iconColor={theme.colors.onSurface}
+                style={styles.actionIcon}
+              />
+              <IconButton
+                icon="creation"
+                size={24}
+                iconColor={theme.colors.onSurface}
+                style={styles.actionIcon}
+              />
+            </View>
           </View>
         </Surface>
       </KeyboardAvoidingView>
 
       {/* Bottom Sheet Modal */}
       <BottomSheetModal
-      ref={bottomSheetModalRef}
+        ref={bottomSheetModalRef}
         enableDynamicSizing={true}
         backgroundStyle={{ backgroundColor: theme.colors.elevation.level3 }}
-        handleIndicatorStyle={{ backgroundColor: theme.colors.onSurfaceVariant }}
+        handleIndicatorStyle={{
+          backgroundColor: theme.colors.onSurfaceVariant,
+        }}
         backdropComponent={(props) => (
-            <BottomSheetBackdrop {...props} disappearsOnIndex={-1} appearsOnIndex={0} opacity={0.5} />
+          <BottomSheetBackdrop
+            {...props}
+            disappearsOnIndex={-1}
+            appearsOnIndex={0}
+            opacity={0.5}
+          />
         )}
       >
         <BottomSheetView style={styles.bottomSheetContent}>
-            <BottomSheetItem icon="snowman" label="Create images" />
-            <BottomSheetItem icon="web" label="Deep Research" />
-            <BottomSheetItem icon="plus-box-outline" label="Canvas" />
-            <BottomSheetItem icon="school-outline" label="Guided Learning" />
+          <BottomSheetItem icon="snowman" label="Create images" />
+          <BottomSheetItem icon="web" label="Deep Research" />
+          <BottomSheetItem icon="plus-box-outline" label="Canvas" />
+          <BottomSheetItem icon="school-outline" label="Guided Learning" />
+        </BottomSheetView>
+      </BottomSheetModal>
+      {/* Model Selection Bottom Sheet */}
+      <BottomSheetModal
+        ref={modelBottomSheetRef}
+        index={0}
+        snapPoints={modelSnapPoints}
+        backgroundStyle={{ backgroundColor: theme.colors.elevation.level3 }}
+        handleIndicatorStyle={{
+          backgroundColor: theme.colors.onSurfaceVariant,
+        }}
+        backdropComponent={(props) => (
+          <BottomSheetBackdrop
+            {...props}
+            disappearsOnIndex={-1}
+            appearsOnIndex={0}
+            opacity={0.5}
+          />
+        )}
+      >
+        <BottomSheetView style={styles.bottomSheetContent}>
+          <Text
+            style={[
+              styles.modelSheetHeader,
+              { color: theme.colors.onSurfaceVariant },
+            ]}
+          >
+            Gemini 3
+          </Text>
+
+          <ModelItem title="Fast" subtitle="Answers quickly" isSelected />
+          <ModelItem
+            title="Thinking"
+            subtitle="Solves complex problems"
+            isNew
+          />
+          <ModelItem
+            title="Pro"
+            subtitle="Thinks longer for advanced maths and code"
+            isNew
+          />
+          <ModelItem
+            title="Upgrade to Google AI Pro"
+            subtitle="Get our most capable models and features"
+            isUpgrade
+          />
         </BottomSheetView>
       </BottomSheetModal>
     </SafeAreaView>
   );
 }
 
-function BottomSheetItem({ icon, label }: { icon: any; label: string }) {
-    const theme = useTheme();
-    return (
-        <TouchableOpacity style={styles.bottomSheetItem}>
-            <View style={styles.bottomSheetIconWrapper}>
-               <MaterialCommunityIcons name={icon} size={24} color={theme.colors.onSurface} />
-            </View>
-            <Text style={[styles.bottomSheetLabel, { color: theme.colors.onSurface }]}>{label}</Text>
-        </TouchableOpacity>
-    )
+function ModelItem({
+  title,
+  subtitle,
+  isSelected,
+  isNew,
+  isUpgrade,
+}: {
+  title: string;
+  subtitle: string;
+  isSelected?: boolean;
+  isNew?: boolean;
+  isUpgrade?: boolean;
+}) {
+  const theme = useTheme();
+  return (
+    <TouchableOpacity style={styles.modelItem}>
+      <View style={{ flex: 1 }}>
+        <Text style={[styles.modelTitle, { color: theme.colors.onSurface }]}>
+          {title}
+        </Text>
+        <Text
+          style={[
+            styles.modelSubtitle,
+            { color: theme.colors.onSurfaceVariant },
+          ]}
+        >
+          {subtitle}
+        </Text>
+      </View>
+      <View>
+        {isSelected && (
+          <MaterialCommunityIcons
+            name="check-circle"
+            size={24}
+            color={theme.colors.primary}
+          />
+        )}
+        {isNew && (
+          <Surface
+            style={[
+              styles.newBadge,
+              { backgroundColor: theme.colors.primaryContainer },
+            ]}
+            elevation={0}
+          >
+            <Text
+              style={[
+                styles.newBadgeText,
+                { color: theme.colors.onPrimaryContainer },
+              ]}
+            >
+              New
+            </Text>
+          </Surface>
+        )}
+        {isUpgrade && (
+          <Surface
+            style={[
+              styles.upgradeButton,
+              { backgroundColor: theme.colors.surfaceVariant },
+            ]}
+            elevation={0}
+          >
+            <Text
+              style={[
+                styles.upgradeButtonText,
+                { color: theme.colors.onSurface },
+              ]}
+            >
+              Upgrade
+            </Text>
+          </Surface>
+        )}
+      </View>
+    </TouchableOpacity>
+  );
 }
 
-function ActionChip({ icon, label, iconColor }: { icon: any; label: string; iconColor: string }) {
-    const theme = useTheme();
-    return (
-        <Surface style={[styles.chip, { backgroundColor: theme.colors.surface }]} elevation={1}>
-             <View style={styles.chipContent}>
-                 <View style={styles.iconWrapper}>
-                    <MaterialCommunityIcons name={icon} size={20} color={iconColor} />
-                 </View>
-                 <Text style={[styles.chipLabel, {color: theme.colors.onSurface}]}>{label}</Text>
-             </View>
-        </Surface>
-    )
+function BottomSheetItem({ icon, label }: { icon: any; label: string }) {
+  const theme = useTheme();
+  return (
+    <TouchableOpacity style={styles.bottomSheetItem}>
+      <View style={styles.bottomSheetIconWrapper}>
+        <MaterialCommunityIcons
+          name={icon}
+          size={24}
+          color={theme.colors.onSurface}
+        />
+      </View>
+      <Text
+        style={[styles.bottomSheetLabel, { color: theme.colors.onSurface }]}
+      >
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+}
+
+function ActionChip({
+  icon,
+  label,
+  iconColor,
+}: {
+  icon: any;
+  label: string;
+  iconColor: string;
+}) {
+  const theme = useTheme();
+  return (
+    <Surface
+      style={[styles.chip, { backgroundColor: theme.colors.surface }]}
+      elevation={1}
+    >
+      <View style={styles.chipContent}>
+        <View style={styles.iconWrapper}>
+          <MaterialCommunityIcons name={icon} size={20} color={iconColor} />
+        </View>
+        <Text style={[styles.chipLabel, { color: theme.colors.onSurface }]}>
+          {label}
+        </Text>
+      </View>
+    </Surface>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -152,19 +412,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 12,
-    position: 'relative',
+    position: "relative",
   },
   headerTitle: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     right: 0,
-    textAlign: 'center',
-    fontWeight: '500',
+    textAlign: "center",
+    fontWeight: "500",
     fontSize: 22,
     zIndex: -1,
   },
@@ -177,7 +437,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   greetingText: {
-    fontWeight: '400',
+    fontWeight: "400",
     lineHeight: 44,
   },
   suggestions: {
@@ -190,110 +450,149 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   cardContent: {
-      flexDirection: 'row',
-      alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   pill: {
-      width: 16,
-      height: 40,
-      borderRadius: 20,
-      marginRight: 16,
+    width: 16,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 16,
   },
   cardText: {
-      flex: 1,
-      fontSize: 18,
-      lineHeight: 26,
+    flex: 1,
+    fontSize: 18,
+    lineHeight: 26,
   },
   chipsContainer: {
-      marginTop: 10,
+    marginTop: 10,
   },
   chipsColumn: {
-      flexDirection: 'column',
-      gap: 12,
-      width: width - 40, 
+    flexDirection: "column",
+    gap: 12,
+    width: width - 40,
   },
   chip: {
-      paddingVertical: 14,
-      paddingHorizontal: 20,
-      borderRadius: 50,
-      alignSelf: 'flex-start',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 50,
+    alignSelf: "flex-start",
   },
   chipContent: {
-      flexDirection: 'row',
-      alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   iconWrapper: {
-      marginRight: 12,
+    marginRight: 12,
   },
   chipLabel: {
-      fontSize: 16,
-      fontWeight: '500',
+    fontSize: 16,
+    fontWeight: "500",
   },
   bottomPanel: {
-    borderTopLeftRadius: 24, 
+    borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 16,
     paddingBottom: 16, // Reduced padding bottom as SafeArea handles the rest or KeyboardAvoidingView
     // Shadow for light mode
     shadowColor: "#000",
     shadowOffset: {
-        width: 0,
-        height: -2,
+      width: 0,
+      height: -2,
     },
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 5,
   },
   textInput: {
-      fontSize: 18,
-      paddingHorizontal: 8,
-      marginBottom: 16,
-      minHeight: 24, 
+    fontSize: 18,
+    paddingHorizontal: 8,
+    marginBottom: 16,
+    minHeight: 24,
   },
   bottomActions: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   leftActions: {
-      flexDirection: 'row',
-      alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   rightActions: {
-      flexDirection: 'row',
-      alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   actionIcon: {
-      margin: 0,
-      marginRight: 8,
+    margin: 0,
+    marginRight: 8,
   },
   fastBadge: {
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 16,
-      borderWidth: 1,
-      marginRight: 8,
-      backgroundColor: 'transparent',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginRight: 8,
+    backgroundColor: "transparent",
   },
   fastBadgeText: {
-      fontSize: 12,
-      fontWeight: '600',
+    fontSize: 12,
+    fontWeight: "600",
   },
   bottomSheetContent: {
-      padding: 16,
-      paddingTop: 8,
-      paddingBottom: 20
+    padding: 16,
+    paddingTop: 8,
+    paddingBottom: 20,
   },
   bottomSheetItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 16,
   },
   bottomSheetIconWrapper: {
-      marginRight: 16,
+    marginRight: 16,
   },
   bottomSheetLabel: {
-      fontSize: 18,
-      fontWeight: '400',
-  }
+    fontSize: 18,
+    fontWeight: "400",
+  },
+  modelSheetHeader: {
+    fontSize: 14,
+    fontWeight: "500",
+    marginBottom: 12,
+  },
+  modelItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    paddingVertical: 16,
+  },
+  modelTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  modelSubtitle: {
+    fontSize: 14,
+    lineHeight: 20,
+    paddingRight: 16,
+  },
+  newBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  newBadgeText: {
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  upgradeButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  upgradeButtonText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
 });
