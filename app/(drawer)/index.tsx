@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Dimensions, TextInput, Keyboard } from 'react-native';
-import { Text, Surface, IconButton, useTheme, Avatar } from 'react-native-paper';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useColorScheme } from '@/hooks/use-color-scheme';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { DrawerActions } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import React, { useState } from 'react';
+import { Dimensions, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Avatar, IconButton, Surface, Text, useTheme } from 'react-native-paper';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width } = Dimensions.get('window');
 
@@ -15,120 +15,116 @@ export default function HomeScreen() {
   const [inputText, setInputText] = useState('');
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  const insets = useSafeAreaInsets();
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top', 'left', 'right']}>
-      {/* Header */}
-      <View style={styles.header}>
-        <IconButton
-          icon="menu"
-          size={28}
-          iconColor={theme.colors.onSurface}
-          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-        />
-        <Text variant="titleLarge" style={[styles.headerTitle, { color: theme.colors.onSurface }]}>Gemini</Text>
-        <Avatar.Text 
-            size={36} 
-            label="S" 
-            style={{ backgroundColor: isDark ? '#7cacf8' : '#AF52DE' }} 
-            labelStyle={{ color: '#fff', fontWeight: 'bold' }}
-        />
-      </View>
-
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-        <View style={styles.greetingContainer}>
-          <Text variant="headlineMedium" style={[styles.greetingText, { color: theme.colors.onSurface }]}>
-            Hi Saad
-          </Text>
-          <Text variant="headlineLarge" style={[styles.greetingText, { color: theme.colors.onSurface }]}>
-            Happy New Year! Let’s make it your best yet
-          </Text>
-        </View>
-
-        {/* Suggestion Cards */}
-        <View style={styles.suggestions}>
-          <SuggestionCard 
-            text="Make me a 2025 year-in-review worksheet" 
-            pillColor={isDark ? "#6552FF" : "#AF52DE"} // Adjust pill color for light mode visibility if needed, or keep same
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
+        style={{ flex: 1 }}
+      >
+        {/* Header */}
+        <View style={styles.header}>
+          <IconButton
+            icon="menu"
+            size={28}
+            iconColor={theme.colors.onSurface}
+            onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
           />
-           <SuggestionCard 
-            text="Show me at a '20s New Year's celebration" 
-            pillColor={isDark ? "#6552FF" : "#AF52DE"}
+          <Text variant="titleLarge" style={[styles.headerTitle, { color: theme.colors.onSurface }]}>Gemini</Text>
+          <Avatar.Text 
+              size={36} 
+              label="S" 
+              style={{ backgroundColor: isDark ? '#7cacf8' : '#AF52DE' }} 
+              labelStyle={{ color: '#000', fontWeight: 'bold' }}
           />
         </View>
 
-        {/* Action Chips */}
-        <View style={styles.chipsContainer}>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ overflow: 'visible' }}>
-                <View style={styles.chipsColumn}>
-                    <ActionChip icon="image-outline" label="Create image" iconColor="#90caf9" />
-                    <ActionChip icon="pencil-outline" label="Write anything" iconColor="#81d4fa" />
-                    <ActionChip icon="school-outline" label="Help me learn" iconColor="#ffcc80" />
-                    <ActionChip icon="star-four-points-outline" label="Boost my day" iconColor="#fff59d" />
-                </View>
-            </ScrollView>
-        </View>
+        <ScrollView 
+          contentContainerStyle={styles.content} 
+          showsVerticalScrollIndicator={false} 
+          keyboardShouldPersistTaps="handled"
+          style={{ flex: 1 }}
+        >
+          <View style={styles.greetingContainer}>
+            <Text variant="headlineLarge" style={[styles.greetingText, { color: theme.colors.onSurface }]}>
+              I can help write, plan, research and more. What should we do?
+            </Text>
+          </View>
 
-      </ScrollView>
+          {/* Suggestion Cards */}
+          {/* <View style={styles.suggestions}>
+            <SuggestionCard 
+              text="Make me a 2025 year-in-review worksheet" 
+              pillColor={isDark ? "#6552FF" : "#AF52DE"}
+            />
+             <SuggestionCard 
+              text="Show me at a '20s New Year's celebration" 
+              pillColor={isDark ? "#6552FF" : "#AF52DE"}
+            />
+          </View> */}
 
-      {/* Bottom Input Area - Resized and Redesigned */}
-      <Surface style={[styles.bottomPanel, { backgroundColor: theme.colors.surface }]} elevation={0}>
-        <TextInput
-            style={[styles.textInput, { color: theme.colors.onSurface }]}
-            placeholder="Ask Gemini"
-            placeholderTextColor={theme.colors.onSurfaceVariant}
-            value={inputText}
-            onChangeText={setInputText}
-            multiline
-        />
-        <View style={styles.bottomActions}>
-            <View style={styles.leftActions}>
-                <IconButton icon="plus" size={24} iconColor={theme.colors.onSurface} style={styles.actionIcon} />
-                <IconButton icon="image-outline" size={24} iconColor={theme.colors.onSurface} style={styles.actionIcon} />
-            </View>
-            <View style={styles.rightActions}>
-                 {/* Assuming "Fast" is a small chip/button */}
-                 {/* <Surface style={styles.fastBadge} elevation={0}><Text style={{fontSize: 12}}>Fast</Text></Surface> */}
-                 <IconButton icon="microphone" size={24} iconColor={theme.colors.onSurface} style={styles.actionIcon} />
-                 <IconButton icon="creation" size={24} iconColor={theme.colors.onSurface} style={styles.actionIcon} />
-            </View>
-        </View>
-      </Surface>
+          {/* Action Chips */}
+          <View style={styles.chipsContainer}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ overflow: 'visible' }}>
+                  <View style={styles.chipsColumn}>
+                      <ActionChip icon="image-outline" label="Create image" iconColor="#90caf9" />
+                      <ActionChip icon="pencil-outline" label="Write anything" iconColor="#81d4fa" />
+                      <ActionChip icon="school-outline" label="Help me learn" iconColor="#ffcc80" />
+                      <ActionChip icon="star-four-points-outline" label="Boost my day" iconColor="#fff59d" />
+                  </View>
+              </ScrollView>
+          </View>
+
+        </ScrollView>
+
+        {/* Bottom Input Area - Keyboard Aware */}
+        <Surface style={[styles.bottomPanel, { backgroundColor: theme.colors.surface, paddingBottom: Math.max(16, insets.bottom) }]} elevation={0}>
+          <TextInput
+              style={[styles.textInput, { color: theme.colors.onSurface }]}
+              placeholder="Ask Gemini"
+              placeholderTextColor={theme.colors.onSurfaceVariant}
+              value={inputText}
+              onChangeText={setInputText}
+              multiline
+          />
+          <View style={styles.bottomActions}>
+              <View style={styles.leftActions}>
+                  <IconButton icon="plus" size={24} iconColor={theme.colors.onSurface} style={styles.actionIcon} />
+                  <IconButton icon="image-outline" size={24} iconColor={theme.colors.onSurface} style={styles.actionIcon} />
+              </View>
+              <View style={styles.rightActions}>
+                   <Surface style={[styles.fastBadge, { borderColor: theme.colors.outline }]} elevation={0}>
+                       <Text style={[styles.fastBadgeText, { color: theme.colors.onSurface }]}>Fast</Text>
+                   </Surface>
+                   <IconButton icon="microphone" size={24} iconColor={theme.colors.onSurface} style={styles.actionIcon} />
+                   <IconButton icon="creation" size={24} iconColor={theme.colors.onSurface} style={styles.actionIcon} />
+              </View>
+          </View>
+        </Surface>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
-function SuggestionCard({ text, pillColor }) {
-    const theme = useTheme();
-    const colorScheme = useColorScheme();
-    const isDark = colorScheme === 'dark';
-    
-    // In Light mode, we might want a subtle background if it's too plain, 
-    // but the screenshot shows text on white/grey. 
-    // Let's keep it simple: just text and pill.
-    // Actually, looking at the light mode screenshot, there IS a faint background on the cards?
-    // No, it looks like just text next to the pill.
-    // Wait, looking closer at the cropped images, there is a very faint grey background for the suggestion item?
-    // It's hard to tell. Let's stick to the current design but ensure text color is correct.
-    
-    return (
-        <View style={styles.card}>
-             <View style={styles.cardContent}>
-                 <View style={[styles.pill, { backgroundColor: pillColor }]} />
-                <Text style={[styles.cardText, {color: theme.colors.onSurface}]}>{text}</Text>
-             </View>
-        </View>
-    )
-}
+// function SuggestionCard({ text, pillColor }: { text: string; pillColor: string }) {
+//     const theme = useTheme();
+//     return (
+//         <View style={styles.card}>
+//              <View style={styles.cardContent}>
+//                  <View style={[styles.pill, { backgroundColor: pillColor }]} />
+//                 <Text style={[styles.cardText, {color: theme.colors.onSurface}]}>{text}</Text>
+//              </View>
+//         </View>
+//     )
+// }
 
-function ActionChip({ icon, label, iconColor }) {
+function ActionChip({ icon, label, iconColor }: { icon: any; label: string; iconColor: string }) {
     const theme = useTheme();
     return (
         <Surface style={[styles.chip, { backgroundColor: theme.colors.surface }]} elevation={1}>
              <View style={styles.chipContent}>
                  <View style={styles.iconWrapper}>
-                    {/* In light mode, icon colors might need to be darker or keep them colorful? 
-                        Screenshot shows colorful icons on white chips. */}
                     <MaterialCommunityIcons name={icon} size={20} color={iconColor} />
                  </View>
                  <Text style={[styles.chipLabel, {color: theme.colors.onSurface}]}>{label}</Text>
@@ -153,14 +149,11 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     fontWeight: '500',
     fontSize: 22,
-    textAlign: 'center', // Center title as per screenshot? No, it's left aligned in the first dark screenshot, but centered in the light one?
-    // Light screenshot: "Gemini" is centered. Dark screenshot: "Gemini" is left aligned next to menu?
-    // Actually, in the light screenshot, "Gemini" is centered.
-    // Let's center it.
+    textAlign: 'center',
   },
   content: {
     padding: 20,
-    paddingBottom: 160, // More padding for the larger bottom panel
+    paddingBottom: 20, // Reduced padding as panel is now separate
   },
   greetingContainer: {
     marginTop: 10,
@@ -220,15 +213,11 @@ const styles = StyleSheet.create({
       fontWeight: '500',
   },
   bottomPanel: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
     borderTopLeftRadius: 24, 
     borderTopRightRadius: 24,
     padding: 16,
-    paddingBottom: 30, // For home indicator
-    // Shadow for light mode to separate from background if needed
+    paddingBottom: 16, // Reduced padding bottom as SafeArea handles the rest or KeyboardAvoidingView
+    // Shadow for light mode
     shadowColor: "#000",
     shadowOffset: {
         width: 0,
@@ -242,7 +231,6 @@ const styles = StyleSheet.create({
       fontSize: 18,
       paddingHorizontal: 8,
       marginBottom: 16,
-      // Ensure it takes up some space
       minHeight: 24, 
   },
   bottomActions: {
@@ -267,7 +255,6 @@ const styles = StyleSheet.create({
       paddingVertical: 6,
       borderRadius: 16,
       borderWidth: 1,
-      borderColor: '#e3e3e3',
       marginRight: 8,
       backgroundColor: 'transparent',
   },
