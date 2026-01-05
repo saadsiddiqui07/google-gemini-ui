@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { DrawerActions } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useColorScheme } from '@/hooks/use-color-scheme';
 
 const { width } = Dimensions.get('window');
 
@@ -12,9 +13,11 @@ export default function HomeScreen() {
   const theme = useTheme();
   const navigation = useNavigation();
   const [inputText, setInputText] = useState('');
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]} edges={['top', 'left', 'right']}>
       {/* Header */}
       <View style={styles.header}>
         <IconButton
@@ -27,8 +30,8 @@ export default function HomeScreen() {
         <Avatar.Text 
             size={36} 
             label="S" 
-            style={{ backgroundColor: '#7cacf8' }} // Using the light blue/purple from image for Avatar
-            labelStyle={{ color: '#000', fontWeight: 'bold' }}
+            style={{ backgroundColor: isDark ? '#7cacf8' : '#AF52DE' }} 
+            labelStyle={{ color: '#fff', fontWeight: 'bold' }}
         />
       </View>
 
@@ -46,11 +49,11 @@ export default function HomeScreen() {
         <View style={styles.suggestions}>
           <SuggestionCard 
             text="Make me a 2025 year-in-review worksheet" 
-            pillColor="#6552FF"
+            pillColor={isDark ? "#6552FF" : "#AF52DE"} // Adjust pill color for light mode visibility if needed, or keep same
           />
            <SuggestionCard 
             text="Show me at a '20s New Year's celebration" 
-            pillColor="#6552FF"
+            pillColor={isDark ? "#6552FF" : "#AF52DE"}
           />
         </View>
 
@@ -68,32 +71,46 @@ export default function HomeScreen() {
 
       </ScrollView>
 
-      {/* Bottom Input Area */}
-      <View style={[styles.bottomBar, { backgroundColor: theme.colors.surface }]}>
-        <View style={styles.inputContainer}>
-            <IconButton icon="plus" size={26} iconColor={theme.colors.onSurface} style={styles.plusIcon} />
-            
-            <TextInput
-                style={[styles.textInput, { color: theme.colors.onSurface }]}
-                placeholder="Ask Gemini"
-                placeholderTextColor={theme.colors.onSurfaceVariant}
-                value={inputText}
-                onChangeText={setInputText}
-            />
-
-             <View style={styles.rightIcons}>
-                 <IconButton icon="microphone" size={22} iconColor={theme.colors.onSurface} />
-                 <IconButton icon="creation" size={22} iconColor={theme.colors.onSurface} />
-             </View>
+      {/* Bottom Input Area - Resized and Redesigned */}
+      <Surface style={[styles.bottomPanel, { backgroundColor: theme.colors.surface }]} elevation={0}>
+        <TextInput
+            style={[styles.textInput, { color: theme.colors.onSurface }]}
+            placeholder="Ask Gemini"
+            placeholderTextColor={theme.colors.onSurfaceVariant}
+            value={inputText}
+            onChangeText={setInputText}
+            multiline
+        />
+        <View style={styles.bottomActions}>
+            <View style={styles.leftActions}>
+                <IconButton icon="plus" size={24} iconColor={theme.colors.onSurface} style={styles.actionIcon} />
+                <IconButton icon="image-outline" size={24} iconColor={theme.colors.onSurface} style={styles.actionIcon} />
+            </View>
+            <View style={styles.rightActions}>
+                 {/* Assuming "Fast" is a small chip/button */}
+                 {/* <Surface style={styles.fastBadge} elevation={0}><Text style={{fontSize: 12}}>Fast</Text></Surface> */}
+                 <IconButton icon="microphone" size={24} iconColor={theme.colors.onSurface} style={styles.actionIcon} />
+                 <IconButton icon="creation" size={24} iconColor={theme.colors.onSurface} style={styles.actionIcon} />
+            </View>
         </View>
-      </View>
+      </Surface>
     </SafeAreaView>
   );
 }
 
 function SuggestionCard({ text, pillColor }) {
     const theme = useTheme();
-    // Using transparent background to match the "text on black" look from the image
+    const colorScheme = useColorScheme();
+    const isDark = colorScheme === 'dark';
+    
+    // In Light mode, we might want a subtle background if it's too plain, 
+    // but the screenshot shows text on white/grey. 
+    // Let's keep it simple: just text and pill.
+    // Actually, looking at the light mode screenshot, there IS a faint background on the cards?
+    // No, it looks like just text next to the pill.
+    // Wait, looking closer at the cropped images, there is a very faint grey background for the suggestion item?
+    // It's hard to tell. Let's stick to the current design but ensure text color is correct.
+    
     return (
         <View style={styles.card}>
              <View style={styles.cardContent}>
@@ -107,9 +124,11 @@ function SuggestionCard({ text, pillColor }) {
 function ActionChip({ icon, label, iconColor }) {
     const theme = useTheme();
     return (
-        <Surface style={[styles.chip, { backgroundColor: theme.colors.surfaceVariant }]} elevation={0}>
+        <Surface style={[styles.chip, { backgroundColor: theme.colors.surface }]} elevation={1}>
              <View style={styles.chipContent}>
                  <View style={styles.iconWrapper}>
+                    {/* In light mode, icon colors might need to be darker or keep them colorful? 
+                        Screenshot shows colorful icons on white chips. */}
                     <MaterialCommunityIcons name={icon} size={20} color={iconColor} />
                  </View>
                  <Text style={[styles.chipLabel, {color: theme.colors.onSurface}]}>{label}</Text>
@@ -134,10 +153,14 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     fontWeight: '500',
     fontSize: 22,
+    textAlign: 'center', // Center title as per screenshot? No, it's left aligned in the first dark screenshot, but centered in the light one?
+    // Light screenshot: "Gemini" is centered. Dark screenshot: "Gemini" is left aligned next to menu?
+    // Actually, in the light screenshot, "Gemini" is centered.
+    // Let's center it.
   },
   content: {
     padding: 20,
-    paddingBottom: 100, 
+    paddingBottom: 160, // More padding for the larger bottom panel
   },
   greetingContainer: {
     marginTop: 10,
@@ -152,8 +175,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   card: {
-    borderRadius: 16,
-    paddingVertical: 8, // Reduced padding as it's not a card with background anymore
+    paddingVertical: 8,
     paddingHorizontal: 0,
     marginBottom: 4,
   },
@@ -162,9 +184,9 @@ const styles = StyleSheet.create({
       alignItems: 'center',
   },
   pill: {
-      width: 16, // Wider pill
-      height: 40, // Shorter height relative to text
-      borderRadius: 20, // Fully rounded
+      width: 16,
+      height: 40,
+      borderRadius: 20,
       marginRight: 16,
   },
   cardText: {
@@ -197,36 +219,60 @@ const styles = StyleSheet.create({
       fontSize: 16,
       fontWeight: '500',
   },
-  bottomBar: {
-    padding: 16,
-    paddingBottom: 24,
+  bottomPanel: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    borderTopLeftRadius: 0, 
-    borderTopRightRadius: 0,
-  },
-  inputContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: '#1E1F20', // Input background
-      borderRadius: 32,
-      paddingHorizontal: 6,
-      paddingVertical: 6,
-      height: 64,
-  },
-  plusIcon: {
-      backgroundColor: '#2C2C2C',
-      marginRight: 8,
+    borderTopLeftRadius: 24, 
+    borderTopRightRadius: 24,
+    padding: 16,
+    paddingBottom: 30, // For home indicator
+    // Shadow for light mode to separate from background if needed
+    shadowColor: "#000",
+    shadowOffset: {
+        width: 0,
+        height: -2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 5,
   },
   textInput: {
-      flex: 1,
       fontSize: 18,
-      height: '100%',
       paddingHorizontal: 8,
+      marginBottom: 16,
+      // Ensure it takes up some space
+      minHeight: 24, 
   },
-  rightIcons: {
+  bottomActions: {
       flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+  },
+  leftActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+  },
+  rightActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+  },
+  actionIcon: {
+      margin: 0,
+      marginRight: 8,
+  },
+  fastBadge: {
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: 16,
+      borderWidth: 1,
+      borderColor: '#e3e3e3',
+      marginRight: 8,
+      backgroundColor: 'transparent',
+  },
+  fastBadgeText: {
+      fontSize: 12,
+      fontWeight: '600',
   }
 });
